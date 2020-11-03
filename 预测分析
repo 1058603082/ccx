@@ -1,0 +1,254 @@
+#include <iostream>
+#include <cstring>
+#include <vector> 
+#include <set>
+#include <map>
+using namespace std;
+typedef pair<string , int > pll;
+
+vector<string> inputstring;
+set<string> vn , vt;
+map<string , vector<string> > yufa;
+map<string , set<char> > first , follow;
+set<char> temfirst;
+bool ischar(char c)
+{
+	if( (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '\'') return true;
+	return false;
+}
+
+pll get(string s , int j)
+{
+	
+	string cur;
+	cur.push_back(s[j]); j ++;
+	while(j < s.size() && ischar(s[j]))
+	{
+		cur.push_back(s[j ++]);
+		if(vn.find(cur) != vn.end() && j < s.size() && s[j] != '\'') break;
+	}
+	j --;
+	
+	return {cur , j};
+}
+
+void getvnvt()
+{
+	string s;
+	while(cin >> s) inputstring.push_back(s);
+
+	for(auto s : inputstring)
+	{					
+		string cur;	
+		for(int i = 0 ; i < s.size() ; i ++)
+			if(s[i] != '-') cur.push_back(s[i]);
+			else 
+			{
+				yufa[cur].push_back(s.substr(i + 2));
+				break;
+			}
+		vn.insert(cur);	
+	}
+ 	
+ 	for(auto s : inputstring)
+ 	{
+ 		int i = 0;
+ 		while(s[i] != '-') i ++;
+ 		i ++; i ++;
+ 		string cur;
+ 		while(i < s.size())
+ 		{
+ 			if(ischar(s[i]) || s[i] == ' ') 
+			{   i ++;
+			 	continue;
+			}
+ 			else 
+ 			{
+ 				cur.push_back(s[i ++]);
+				vt.insert(cur); 
+				cur.clear();	
+			}
+		}
+	}
+}
+
+void getfirst()
+{
+	bool ischange = true;
+	
+	while(ischange)
+	{
+		ischange = false;
+		for(auto i : vn){
+			for(auto s : yufa[i]){
+				bool havenull = false;
+				for(int j = 0 ; j < s.size() ; j ++){
+					char c = s[j];
+					string ts; ts.push_back(c);
+					if(vt.find(ts) != vt.end()){
+							if(!first[i].count(c))
+							{
+								first[i].insert(c);
+								ischange = true;
+								havenull = false;
+							}
+					}
+					else
+					{
+						string cur;
+						cur.push_back(c); j ++ ;
+						while(j < s.size() && ischar(s[j]))
+						{
+							cur.push_back(s[j ++]);
+							if(vn.find(cur) != vn.end() && j < s.size() && s[j] != '\'') break;
+						}
+						j --;
+					
+						for(auto k : first[cur])
+						{
+							if(k != '$'){
+								if(!first[i].count(k)){
+								first[i].insert(k);
+								ischange = true;
+								}
+								if(first[i].count('$') == 0) havenull = false; 
+							}
+							else havenull = true;
+						}
+					
+					}
+					if(!havenull) break; 
+				}
+				if(havenull && !first[i].count('$') )
+				{
+					first[i].insert('$');
+					ischange = true;
+				}
+			}
+		}
+	}
+	
+	for(auto s : vt){
+		char c = s[0];
+		first[s].insert(c); 
+	}
+	
+//	for(auto c : first){
+//		string s = c.first;
+//		auto a = c.second;
+//		cout << s << " -- ";
+//		for(auto x : a) cout << x << " ";
+//		cout << endl;
+//	}
+		
+}
+
+string gettemfirst(string s , int j)
+{	
+	temfirst.clear();
+	if(j >= s.size()) return "";
+ 	string tem; tem.push_back(s[j]);
+	
+	if(vt.find(tem) != vt.end()) 
+	{
+		temfirst = first[tem];
+		return tem;
+	}
+	else
+	{
+		string cur = get(s , j).first;
+		temfirst = first[cur];
+		return cur;
+	}
+	
+}
+
+void getfollow()
+{
+	string st;
+	for(auto c : inputstring[0]) 
+		if(c != '-') st.push_back(c);
+		else break;
+	follow[st].insert('#');	
+	
+	bool ischange = true;
+	
+	while(ischange)
+	{
+		ischange = false;
+		
+		for(auto i : vn)
+		{
+		//	cout << "vn -- "<< i << " " << endl;
+			for(auto s : yufa[i])
+			{	//cout << s << endl;
+				for(int j = 0 ; j < s.size() ; j ++)
+				{
+					string tem; tem.push_back(s[j]);
+					if(vt.find(tem) != vt.end()) continue;
+					else
+					{
+						pll t = get(s , j);	
+						string cur = t.first;
+					//	cout <<"&&&& "<< cur << endl;
+						j = t.second;
+						string ne = gettemfirst(s , j + 1);
+					//	cout << "### " << ne << " " << temfirst.size() << endl;
+						bool havenull = false;
+						if(temfirst.size())
+						{
+							for(auto c : temfirst) 
+								if(!follow[cur].count(c) && c != '$')
+								{
+									follow[cur].insert(c);
+									ischange = true;
+								}
+								else if(c == '$') havenull = true;
+						}
+					//	if(havenull) cout << "asdasdasd" << endl;
+						if(ne == "" || havenull)
+						{
+							for(auto c : follow[i])	
+								if(!follow[cur].count(c))
+								{
+									follow[cur].insert(c);
+								//	if(cur=="factor" && c == ')') cout << "----adsadasdasd- " << i << endl; 
+									ischange = true;
+								}
+						} 
+						
+					}
+				}
+			}
+			//break;
+		}
+		
+	}
+	cout << " ----------------------  -------------------------- " << endl;
+	for(auto s : follow)
+	{
+		cout << s.first << " --- ";
+		for(auto x : s.second) cout << x << " ";
+		cout << endl;
+	}
+	
+}
+
+
+int main()
+{
+	freopen("1.txt" , "r" , stdin);
+	getvnvt();	
+
+//	for(auto s: vn){
+//		cout << "vn = " << s << ' ';
+//		for(auto c : yufa[s]) cout << c << " ";
+//		cout << endl;
+//	}
+//	cout << "------------- " << endl;
+
+		getfirst();	
+		getfollow();
+		
+	return 0;
+} 
