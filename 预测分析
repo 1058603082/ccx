@@ -11,6 +11,8 @@ set<string> vn , vt;
 map<string , vector<string> > yufa;
 map<string , set<char> > first , follow;
 set<char> temfirst;
+map<string , map<string,string> >f;
+
 bool ischar(char c)
 {
 	if( (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '\'') return true;
@@ -35,6 +37,7 @@ pll get(string s , int j)
 void getvnvt()
 {
 	string s;
+	
 	while(cin >> s) inputstring.push_back(s);
 
 	for(auto s : inputstring)
@@ -132,14 +135,14 @@ void getfirst()
 		char c = s[0];
 		first[s].insert(c); 
 	}
-	
-//	for(auto c : first){
-//		string s = c.first;
-//		auto a = c.second;
-//		cout << s << " -- ";
-//		for(auto x : a) cout << x << " ";
-//		cout << endl;
-//	}
+	cout << "first" << endl;
+	for(auto c : first){
+		string s = c.first;
+		auto a = c.second;
+		cout << s << " -- ";
+		for(auto x : a) cout << x << " ";
+		cout << endl;
+	}
 		
 }
 
@@ -225,6 +228,7 @@ void getfollow()
 		
 	}
 	cout << " ----------------------  -------------------------- " << endl;
+	cout << "follow " << endl;
 	for(auto s : follow)
 	{
 		cout << s.first << " --- ";
@@ -234,21 +238,53 @@ void getfollow()
 	
 }
 
+void gettable()
+{
+	for(auto a : vn){
+		for(auto b : vt)
+		f[a][b] = "error";
+	}
+	
+	for(auto a : vn) f[a]["#"] = "error";
+	// #  , $ , ( ,  ) , *  +  0
+	cout << "            #" << "       " << "$      " << "(        " << ")         " << "*     " << "+    " << " 0 " << endl;    
+	for(auto i : vn){
+		for(auto s : yufa[i])
+		{
+			gettemfirst(s , 0);
+			for(auto j : temfirst)
+			{
+				string cur; cur.push_back(j);
+				f[i][cur] = s;
+				if(temfirst.find('$') != temfirst.end())
+				{
+					for(auto x : follow[i]){
+						string t; t.push_back(x);
+						f[i][t] = s;
+					}
+				}
+			}
+		}
+	}
+	
+	cout << "----------- Table ------------------" << endl;
+	
+	for(auto i : f){
+		cout << i.first << " -- ";
+		for(auto j : i.second) cout << j.second << " ";
+		cout << endl;
+	}
+	
+}
 
 int main()
 {
 	freopen("1.txt" , "r" , stdin);
 	getvnvt();	
-
-//	for(auto s: vn){
-//		cout << "vn = " << s << ' ';
-//		for(auto c : yufa[s]) cout << c << " ";
-//		cout << endl;
-//	}
-//	cout << "------------- " << endl;
-
-		getfirst();	
-		getfollow();
+	getfirst();	
+	getfollow();
+	gettable();
+	
 		
 	return 0;
 } 
