@@ -244,9 +244,9 @@ void gettable()
 		for(auto b : vt)
 		f[a][b] = "error";
 	}
-	
+
 	for(auto a : vn) f[a]["#"] = "error";
-	// #  , $ , ( ,  ) , *  +  0
+	// #  , $ , ( ,  ) , *  +  1
 	cout << "            #" << "       " << "$      " << "(        " << ")         " << "*     " << "+    " << " 0 " << endl;    
 	for(auto i : vn){
 		for(auto s : yufa[i])
@@ -287,15 +287,16 @@ int getans()
 	   if(c != '-')st.push_back(c);
 	   else break;
 	stk.push(st);
-	
+	string que = "1+2;#";
 	string in;
-	cout << "--------" << endl;
+	int k = 0;
+	cout << "-----------------------------" << endl;
 	char c;
-	cin >> c;
-	cout << c << endl;
+	c = que[k++];
+//	cin >> c;
+//	cout << c << endl;
 	in.push_back(c);
-	
-	cout << in << endl;
+	//cout << in << endl;
 	
 	while(stk.size())
 	{
@@ -305,7 +306,9 @@ int getans()
 			if(x == in)
 			{
 				cout << "date  " << in << endl; 
-				cin >> c;in.clear(); in.push_back(c); stk.pop();
+				 c = que[k++];
+			//	cin >> c;
+				in.clear(); in.push_back(c); stk.pop();
 			}
 			else return -1;
 		}
@@ -320,6 +323,7 @@ int getans()
 			if(cur == "error") return -1;
 			else
 			{
+		
 				cout << x << " -> " << cur << endl;
  				stk.pop();
 				int n = cur.size();
@@ -330,7 +334,11 @@ int getans()
 					{
 						string res; res.push_back(cur[i]);
 						i ++;
-						while(i < n && (ischar(cur[i]) || cur[i] == '\'')) res.push_back(cur[i ++]);
+						while(i < n && (ischar(cur[i]) || cur[i] == '\'')) 
+						{    
+							res.push_back(cur[i ++]);
+							if(vn.find(res) != vn.end() && (i + 1 < n && cur[i] != '\'')) break;
+						}
 						i --;
 						tem.push_back(res);
 					}
@@ -338,13 +346,15 @@ int getans()
 					{
 						string res;
 						res.push_back(cur[i]);
+						tem.push_back(res);
 					}
 				}
-				
-				for(int i = tem.size() ; i >= 0 ; i --)
+
+				for(int i = tem.size() - 1; i >= 0 ; i --)
 				if(tem[i] != "$") stk.push(tem[i]);
 			}
 		}
+	
 	}
 	cout << "YES" << endl;
 }
@@ -352,25 +362,16 @@ int getans()
 int main()
 {
 	freopen("1.txt" , "r" , stdin);
+	freopen("out.txt" , "w" , stdout);
 	getvnvt();	
 	getfirst();	
 	getfollow();
 	gettable();
-	freopen("2.txt" , "r" , stdin);
-	getans();
+	//freopen("CON" , "r" , stdin);
+	int d = getans();
+	
+	if(d == -1) cout << "error" << endl;
 		
 	return 0;
 } 
 
-prgm->expr;prgm'
-prgm->prgm
-prgm->$
-expr->termexpr'
-expr'->+termexpr'
-expr'->$
-term->factorterm'
-term'->*factorterm'
-term'->$
-factor->(expr)
-factor->1
-factor->2
