@@ -1,6 +1,7 @@
 #include <iostream>
 #include <cstring>
 #include <vector> 
+#include <stack>
 #include <set>
 #include <map>
 using namespace std;
@@ -21,7 +22,6 @@ bool ischar(char c)
 
 pll get(string s , int j)
 {
-	
 	string cur;
 	cur.push_back(s[j]); j ++;
 	while(j < s.size() && ischar(s[j]))
@@ -277,6 +277,78 @@ void gettable()
 	
 }
 
+
+int getans()
+{
+	stack<string> stk;
+	stk.push("#");
+	string st;
+	for(auto c : inputstring[0]) 
+	   if(c != '-')st.push_back(c);
+	   else break;
+	stk.push(st);
+	
+	string in;
+	cout << "--------" << endl;
+	char c;
+	cin >> c;
+	cout << c << endl;
+	in.push_back(c);
+	
+	cout << in << endl;
+	
+	while(stk.size())
+	{
+		string x = stk.top();
+		if(vt.find(x) != vt.end())
+		{
+			if(x == in)
+			{
+				cout << "date  " << in << endl; 
+				cin >> c;in.clear(); in.push_back(c); stk.pop();
+			}
+			else return -1;
+		}
+		else if(x == "#")
+		{
+			if(x == in) break;
+			else return -1;
+		}
+		else
+		{
+			string cur = f[x][in];
+			if(cur == "error") return -1;
+			else
+			{
+				cout << x << " -> " << cur << endl;
+ 				stk.pop();
+				int n = cur.size();
+				vector<string> tem;
+				for(int i = 0 ; i < n ; i ++)
+				{
+					if(ischar(cur[i]) || cur[i] == '\'')
+					{
+						string res; res.push_back(cur[i]);
+						i ++;
+						while(i < n && (ischar(cur[i]) || cur[i] == '\'')) res.push_back(cur[i ++]);
+						i --;
+						tem.push_back(res);
+					}
+					else
+					{
+						string res;
+						res.push_back(cur[i]);
+					}
+				}
+				
+				for(int i = tem.size() ; i >= 0 ; i --)
+				if(tem[i] != "$") stk.push(tem[i]);
+			}
+		}
+	}
+	cout << "YES" << endl;
+}
+
 int main()
 {
 	freopen("1.txt" , "r" , stdin);
@@ -284,7 +356,21 @@ int main()
 	getfirst();	
 	getfollow();
 	gettable();
-	
+	freopen("2.txt" , "r" , stdin);
+	getans();
 		
 	return 0;
 } 
+
+prgm->expr;prgm'
+prgm->prgm
+prgm->$
+expr->termexpr'
+expr'->+termexpr'
+expr'->$
+term->factorterm'
+term'->*factorterm'
+term'->$
+factor->(expr)
+factor->1
+factor->2
